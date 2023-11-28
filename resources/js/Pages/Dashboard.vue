@@ -14,9 +14,20 @@ import Welcome from '@/Components/Welcome.vue';
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                    <Welcome />
+                    <CKFinderComponent></CKFinderComponent>
                 </div>
             </div>
         </div>
     </AppLayout>
 </template>
+
+<script>
+import CKFinderComponent from '@/Components/CkfinderButton.vue';
+
+export default {
+    components: {
+        CKFinderComponent,
+    },
+    // Các phương thức khác của component
+}
+</script>
