@@ -1,0 +1,60 @@
+#sidebar {
+    width: 250px;
+    padding: 10px;
+
+}
+
+#sidebar.active {
+    width: 70px;
+    padding: 10px;
+
+}
+
+#sidebar .show {
+    display: block;
+}
+
+#sidebar .hide {
+    display: none;
+}
+
+#sidebar.active .show {
+    display: none;
+}
+
+#sidebar.active .hide {
+    display: block;
+
+}
+
+#sidebar .sidebar-header {
+    position: relative;
+    text-align: center;
+    border-bottom: solid purple 2px;
+    margin-bottom: 20px;
+}
+
+#sidebar .sidebar-header img {
+    width: 100%;
+}
+
+#sidebar .sidebar-header .btn {
+    position: absolute;
+    right: -33px;
+    top: 9px;
+    cursor: pointer;
+}
+
+#sidebar .sidebar-header .btn svg {
+    font-size: 20px;
+}
+
+.sidebar-item {
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.sidebar-item.active {
+    cursor: pointer;
+    /* background: #fff; */
+}
