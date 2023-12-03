@@ -9,6 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
+import CKEditor from '@ckeditor/ckeditor5-vue';
+import store from './store';
+import axios from 'axios';
+window.axios = axios;
 library.add(fas)
 library.add(fab)
 const appName = import.meta.env.VITE_APP_NAME || 'VNWA ADMIN';
@@ -20,6 +24,8 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(store)
+            .use(CKEditor)
             .component('icon', FontAwesomeIcon)
 
             .mount(el);

@@ -145,7 +145,7 @@ const logout = () => {
                                             </div>
 
                                             <DropdownLink :href="route('profile.show')">
-                                                Profile
+                                                Tài khoản
                                             </DropdownLink>
 
                                             <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
@@ -204,7 +204,7 @@ const logout = () => {
 
                             <div class="mt-3 space-y-1">
                                 <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                    Profile
+                                    Tài khoản
                                 </ResponsiveNavLink>
 
                                 <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">

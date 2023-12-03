@@ -29,8 +29,8 @@ $config['authentication'] = '\App\Http\Middleware\CustomCKFinderAuth';
 /*============================ License Key ============================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_licenseKey
 
-$config['licenseName'] = '';
-$config['licenseKey'] = '';
+$config['licenseName'] = 'http://vinawebapp.com/';
+$config['licenseKey'] = '*5?7-*1**-U**V-*U**-*M**-N*Z*-3**H';
 
 /*============================ CKFinder Internal Directory ============================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_privateDir
@@ -82,8 +82,8 @@ $config['backends']['laravel_logs'] = [
 $config['backends']['default'] = [
     'name' => 'default',
     'adapter' => 'local',
-    'baseUrl' => config('app.url') . '/userfiles/',
-    'root' => public_path('/userfiles/'),
+    'baseUrl' => config('app.url') . '/storage/uploads/',
+    'root' => public_path('/storage/uploads/'),
     'chmodFiles' => 0777,
     'chmodFolders' => 0755,
     'filesystemEncoding' => 'UTF-8',
