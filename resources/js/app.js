@@ -10,6 +10,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import CKEditor from '@ckeditor/ckeditor5-vue';
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import 'vue3-easy-data-table/dist/style.css';
 import store from './store';
 import axios from 'axios';
 window.axios = axios;
@@ -27,7 +29,7 @@ createInertiaApp({
             .use(store)
             .use(CKEditor)
             .component('icon', FontAwesomeIcon)
-
+            .component('DataTable', Vue3EasyDataTable)
             .mount(el);
     },
     progress: {

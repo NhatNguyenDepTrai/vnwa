@@ -16,11 +16,17 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 export default {
-    setup() {
+
+    props: { data: String },
+    setup(props) {
         const url_image = ref('');
+
+        watchEffect(() => {
+            url_image.value = props.data;
+        });
 
         function openCKFinder() {
             CKFinder.popup({

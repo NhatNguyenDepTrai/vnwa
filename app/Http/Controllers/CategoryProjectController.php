@@ -1,21 +1,47 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Carbon\Carbon;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\CategoryProject;
 use App\Models\ListSlug;
 use App\Models\ListImage;
+use App\Models\ListView;
 
 class CategoryProjectController extends Controller
 {
-    public function createSlug($slug)
+    function createSlug($slug)
     {
         $check = ListSlug::where('slug', $slug)->first();
         return $check ? true : false;
     }
+    function updateSlug($slug, $tb, $id)
+    {
+        $check = ListSlug::where('slug', $slug)
+            ->whereNotIn('tb', [$tb])
+            ->whereNotIn('id_tb', [$id])
+            ->first();
+        return $check ? true : false;
+    }
+    function showIndex()
+    {
+        $data = CategoryProject::all();
+        foreach ($data as $key => $value) {
+            $value->create_time = Carbon::parse($value->created_at)->format('H:i , d/m/Y ');
+            $value->update_time = Carbon::parse($value->updated_at)->format('H:i , d/m/Y ');
+            $value->list_image = ListView::where('tb', 'category_projects')
+                ->where('id_tb', $value->id)
+                ->get();
 
-    public function create(Request $rq)
+            $value->view = ListView::where('tb', 'category_projects')
+                ->where('id_tb', $value->id)
+                ->count();
+        }
+        return Inertia::render('CategoryProject/Show', ['data' => $data]);
+    }
+
+    function create(Request $rq)
     {
         $tb = 'category_project';
         $listSubImage = $rq->listSubImage;
@@ -81,6 +107,83 @@ class CategoryProjectController extends Controller
             ListImage::create([
                 'tb' => $tb,
                 'id_tb' => $id_tb,
+                'url_image' => $value,
+            ]);
+        }
+        return response()->json(['success' => 'Cập nhập dữ liệu thành công']);
+    }
+    function showEdit($id)
+    {
+        $data = CategoryProject::with('listImages')->find($id);
+        return Inertia::render('CategoryProject/Edit', ['data' => $data]);
+    }
+    function updateCategoryProject(Request $rq, $id)
+    {
+        $tb = 'category_project';
+        $listSubImage = $rq->listSubImage;
+        $data = [];
+        $data['url_bg'] = $rq->url_bg;
+        $data['desc'] = $rq->desc;
+        $data['content'] = $rq->content;
+        if (!$id) {
+            return response()->json(['error' => 'Có lỗi xảy ra, không cập nhập được slug, hãy load lại trang', 'column' => 'slug']);
+        }
+        if (!$rq->url_avatar) {
+            return response()->json(['error' => 'Vui lòng chọn ảnh đại diện', 'column' => 'url_avatar']);
+        } else {
+            $data['url_avatar'] = $rq->url_avatar;
+        }
+
+        if (!$rq->url_avatar_mobile) {
+            $data['url_avatar_mobile'] = $rq->url_avatar;
+        } else {
+            $data['url_avatar_mobile'] = $rq->url_avatar_mobile;
+        }
+
+        if (!$rq->name) {
+            return response()->json(['error' => 'Vui lòng nhập tên dữ liệu', 'column' => 'name']);
+        } else {
+            $data['name'] = $rq->name;
+        }
+
+        if (!$rq->slug) {
+            return response()->json(['error' => 'Có lỗi xảy ra, không cập nhập được slug, hãy load lại trang', 'column' => 'slug']);
+        } else {
+            if ($this->updateSlug($rq->slug, $tb, $id)) {
+                return response()->json(['error' => 'Đã có đường dẫn này, nhập đường dẫn khác để tối ưu SEO', 'column' => 'slug']);
+            }
+            $data['slug'] = $rq->slug;
+        }
+
+        if (!$rq->meta_title) {
+            return response()->json(['error' => 'Vui lòng nhập tiêu đề link để tối ưu SEO', 'column' => 'meta_title']);
+        } else {
+            $data['meta_title'] = $rq->meta_title;
+        }
+
+        if (!$rq->meta_image) {
+            return response()->json(['error' => 'Vui lòng chọn ảnh link để tối ưu SEO', 'column' => 'meta_image']);
+        } else {
+            $data['meta_image'] = $rq->meta_image;
+        }
+
+        if (!$rq->meta_desc) {
+            return response()->json(['error' => 'Vui lòng nhập mô tả link để tối ưu SEO', 'column' => 'meta_desc']);
+        } else {
+            $data['meta_desc'] = $rq->meta_desc;
+        }
+
+        CategoryProject::where('id', $id)->update($data);
+        ListSlug::where('tb', $tb)
+            ->where('id_tb', $id)
+            ->update(['name' => $rq->name, 'slug' => $rq->slug]);
+        ListImage::where('tb', $tb)
+            ->where('id_tb', $id)
+            ->delete();
+        foreach ($listSubImage as $key => $value) {
+            ListImage::create([
+                'tb' => $tb,
+                'id_tb' => $id,
                 'url_image' => $value,
             ]);
         }

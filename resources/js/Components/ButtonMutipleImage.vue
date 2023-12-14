@@ -9,7 +9,7 @@
             <draggable v-model="list_image" :item-key="customKeyFunction" tag="ul" class="grid grid-cols-12 ">
                 <template #item="item">
                     <li class="col-span-6 p-1 ButtonMutipleImage_item border">
-
+                        <span class="absolute z-10 bg-white  w-5 text-center text-xs bottom-0 border-solid border-purple-700 border-2">{{ item.index }}</span>
                         <img :src="item.element" width="100%" height="auto" class="w-full h-auto" alt="" />
                         <div class="delete">
                             <button @click="deleteItem(item.index)" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
@@ -58,26 +58,31 @@
 }
 </style>
 <script>
-import { ref } from 'vue';
+
+import { ref, watchEffect, toRefs } from 'vue';
 import draggable from 'vuedraggable';
 export default {
     components: {
         draggable
     },
+    props: {
+        data: {
+            type: Array,
+            default: () => [],
+        }, // Định nghĩa prop để nhận dữ liệu từ thành phần cha
+    },
     methods: {
         customKeyFunction(item) {
             // Trả về một giá trị duy nhất để xác định meal
-
             return item.someUniqueIdentifier;
         },
         deleteItem(index) {
             this.list_image.splice(index, 1);
         }
     },
-    setup() {
+    setup(props) {
 
-        const list_image = ref([]);
-
+        const list_image = ref(props.data);
         function openCKFinder() {
             CKFinder.popup({
                 chooseFiles: true,
@@ -87,12 +92,10 @@ export default {
                         files.forEach((file) => {
                             list_image.value.push(file.attributes.url);
                         });
-
                     });
                 },
             });
         }
-
         return {
             list_image,
             openCKFinder,

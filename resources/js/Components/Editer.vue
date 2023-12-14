@@ -13,15 +13,17 @@
 
 <script>
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
+import { ref, watchEffect } from 'vue';
 
 export default {
     name: 'Editer',
     data() {
         return {
             editor: DecoupledEditor,
-            editer_data: '',
+
         };
     },
+    props: { data: String },
     methods: {
         onReady(editor) {
             editor.ui.getEditableElement().parentElement.insertBefore(
@@ -59,6 +61,19 @@ export default {
                 };
             };
         },
+    },
+    setup(props) {
+        const editer_data = ref('');
+
+        watchEffect(() => {
+            editer_data.value = props.data;
+        });
+
+
+        return {
+            editer_data
+
+        };
     },
 };
 </script>

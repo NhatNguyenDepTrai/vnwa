@@ -1,13 +1,11 @@
-<script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import Welcome from '@/Components/Welcome.vue';
-</script>
+
 
 <template>
-    <AppLayout title="Thêm Danh Mục Dự Án">
+    <AppLayout title="Sửa Danh Mục Dự Án">
+
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight ">
-                Thêm Danh Mục Dự Án
+                Sửa Danh Mục Dự Án
             </h2>
         </template>
         <div class="overflow-hidden  px-5 mb-3 ">
@@ -33,7 +31,7 @@ import Welcome from '@/Components/Welcome.vue';
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-3 mb-3 p">
                             <div class="mb-3">
                                 <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Tên dữ liệu</label>
-                                <input type="text" v-model="name" @input="updateSlug" placeholder="John" id="name" class="bg-gray-50 border text-base border-gray-300 text-gray-900  rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-white-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-dark dark:focus:ring-purple-500 dark:focus:border-purple-500" required>
+                                <input type="text" v-model="name" @input="updateSlug" placeholder="Nhập tên dữ liệu" id="name" class="bg-gray-50 border text-base border-gray-300 text-gray-900  rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-white-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-dark dark:focus:ring-purple-500 dark:focus:border-purple-500" required>
                                 <span class="text-red-600 text-xs" ref="scroll_name">{{ error.name }}</span>
 
                                 <input type="text" v-model="slug" class=" mt-3 bg-gray-50 border text-base border-gray-300 text-gray-900   w-full " disabled>
@@ -56,7 +54,8 @@ import Welcome from '@/Components/Welcome.vue';
                                     <div class="mb-3">
                                         <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Ảnh đại diện</label>
 
-                                        <InputUrlImage ref="url_avatar" />
+                                        <InputUrlImage ref="url_avatar" :data="data_url_avatar" />
+
                                         <span class="text-red-600 text-xs" ref="scroll_url_avatar">{{ error.url_avatar }}</span>
                                     </div>
                                 </div>
@@ -66,7 +65,7 @@ import Welcome from '@/Components/Welcome.vue';
                                     <div class="mb-3">
                                         <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Ảnh đại diện mobile</label>
                                         <span class="block mb-2 text-slate-600 text-sm">Không nhập sẽ tự động lấy đường dẫn ảnh đại diện </span>
-                                        <InputUrlImage ref="url_avatar_mobile" />
+                                        <InputUrlImage ref="url_avatar_mobile" :data="data_url_avatar_mobile" />
                                     </div>
 
                                 </div>
@@ -76,7 +75,7 @@ import Welcome from '@/Components/Welcome.vue';
                                     <div class="mb-3">
                                         <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Ảnh nền</label>
 
-                                        <InputUrlImage ref="url_bg" />
+                                        <InputUrlImage ref="url_bg" :data="data_url_bg" />
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +84,7 @@ import Welcome from '@/Components/Welcome.vue';
                                     <div class="mb-3">
                                         <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Ảnh kèm theo</label>
 
-                                        <ButtonMutipleImage ref="data_sub_image" />
+                                        <ButtonMutipleImage ref="data_sub_image" :data="list_image" />
                                     </div>
                                 </div>
                             </div>
@@ -94,14 +93,14 @@ import Welcome from '@/Components/Welcome.vue';
                     <div class="col-span-12 p-2">
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-2 mb-3">
                             <label for="editer" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Nội dung</label>
-                            <Editer ref="content" />
+                            <Editer ref="content" :data="data_content" />
                         </div>
                     </div>
                     <div class="col-span-6 p-2">
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg w-full p-3 mb-3 p">
                             <div class="mb-3">
                                 <label for="name" class="block mb-2 font-bold text-base text-gray-900 dark:text-dark">Meta Image</label>
-                                <InputUrlImage ref="meta_image" />
+                                <InputUrlImage ref="meta_image" :data="data_meta_image" />
                                 <span class="text-red-600 text-xs" ref="scroll_meta_image">{{ error.meta_image }}</span>
 
                             </div>
@@ -149,30 +148,26 @@ import Welcome from '@/Components/Welcome.vue';
 <script>
 
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import getSlug from 'speakingurl';
 import InputUrlImage from '@/Components/InputUrlImage.vue';
 import ButtonMutipleImage from '@/Components/ButtonMutipleImage.vue';
 import Editer from '@/Components/Editer.vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 
 export default {
 
-    name: 'Create Category Project',
+    name: 'Edit Category Project',
     components: {
-        InputUrlImage, ButtonMutipleImage, Editer
+        InputUrlImage, ButtonMutipleImage, Editer, AppLayout, Link
     },
 
     data() {
         return {
-            name: '',
-            slug: '',
-            desc: '',
-            meta_title: '',
-            meta_desc: '',
+
             error: {
                 url_avatar: '',
                 name: '',
@@ -220,11 +215,9 @@ export default {
 
             this.clearErrors();
             const url_avatar = this.$refs.url_avatar.url_image;
-
             const url_avatar_mobile = this.$refs.url_avatar_mobile.url_image;
             const url_bg = this.$refs.url_bg.url_image;
             const listSubImage = this.$refs.data_sub_image.list_image;
-
             const name = this.name;
             const slug = this.slug;
             const desc = this.desc;
@@ -232,7 +225,6 @@ export default {
             const content = this.$refs.content.editer_data;
             const meta_image = this.$refs.meta_image.url_image;
             const meta_desc = this.meta_desc;
-
             axios.post('', {
                 url_avatar: url_avatar,
                 url_avatar_mobile: url_avatar_mobile,
@@ -247,23 +239,77 @@ export default {
                 meta_desc: meta_desc,
             })
                 .then((response) => {
-                    if (response.data.error) {
-                        toast.error(response.data.error, {
-                            autoClose: 3000,
-                        });
-                        // this.scrollToElement(response.data.column);
-                        this.error[response.data.column] = response.data.error;
+                    // if (response.data.error) {
+                    //     toast.error(response.data.error, {
+                    //         autoClose: 3000,
+                    //     });
+                    //     // this.scrollToElement(response.data.column);
+                    //     this.error[response.data.column] = response.data.error;
 
-                    } else {
-                        toast.success("Uploads dữ liệu thành công", {
-                            autoClose: 1000,
-                        });
-                    }
-
+                    // } else {
+                    //     toast.success("Uploads dữ liệu thành công", {
+                    //         autoClose: 1000,
+                    //     });
+                    // }
                 })
                 .catch((error) => {
                     console.log(error);
                 });
+        }
+    },
+    setup() {
+        const data_url_avatar = ref('');
+        const data_url_avatar_mobile = ref('');
+        const data_url_bg = ref('');
+        const listSubImage = ref('');
+        const name = ref('');
+        const slug = ref('');
+        const desc = ref('');
+        const meta_title = ref('');
+        const data_content = ref('');
+        const data_meta_image = ref('');
+        const meta_desc = ref('');
+        const list_image = [];
+
+
+        const data = usePage();
+
+        data.props.data.list_images.forEach(element => {
+            list_image.push(element.url_image)
+
+        });
+        data_url_avatar.value = data.props.data.url_avatar;
+        data_url_avatar_mobile.value = data.props.data.url_avatar_mobile;
+        data_url_bg.value = data.props.data.url_bg;
+        listSubImage.value = data.props.data.listSubImage;
+
+        name.value = data.props.data.name;
+        slug.value = data.props.data.slug;
+        desc.value = data.props.data.desc;
+        meta_title.value = data.props.data.meta_title;
+        data_content.value = data.props.data.content;
+
+        data_meta_image.value = data.props.data.meta_image;
+
+        meta_desc.value = data.props.data.meta_desc;
+
+
+
+
+        return {
+
+            data_url_avatar,
+            data_url_avatar_mobile,
+            data_url_bg,
+            listSubImage,
+            name,
+            slug,
+            desc,
+            meta_title,
+            data_content,
+            data_meta_image,
+            meta_desc,
+            list_image
         }
     },
 

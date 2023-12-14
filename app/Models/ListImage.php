@@ -9,4 +9,9 @@ class ListImage extends Model
 {
     use HasFactory;
     protected $fillable = ['tb', 'id_tb', 'url_image'];
+
+    public function categoryProject()
+    {
+        return $this->belongsTo(CategoryProject::class, 'id_tb');
+    }
 }

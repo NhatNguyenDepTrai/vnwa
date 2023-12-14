@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\CategoryProjectController;
+use App\Http\Controllers\VinawebappController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,15 +33,17 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     })->name('dashboard');
 
     Route::post('/ckediter-uploads-file', [FileController::class, 'ckediterUploadsImage']);
+    Route::post('/change-status', [VinawebappController::class, 'changeStatus']);
+    // start Category Project
     Route::prefix('category-project')->group(function () {
-        Route::get('', function () {
-            return Inertia::render('CategoryProject/Show');
-        })->name('CategoryProject');
-
+        Route::get('', [CategoryProjectController::class, 'showIndex'])->name('CategoryProject');
         Route::get('/create', function () {
             return Inertia::render('CategoryProject/Create');
         })->name('CategoryProjectCreate');
-
         Route::post('/create', [CategoryProjectController::class, 'create']);
+
+        Route::get('/edit/{id}', [CategoryProjectController::class, 'showEdit'])->name('CategoryProjectEdit');
+        Route::post('/edit/{id}', [CategoryProjectController::class, 'updateCategoryProject']);
     });
+    // end Category Project
 });
