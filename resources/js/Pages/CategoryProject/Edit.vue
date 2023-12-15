@@ -239,18 +239,19 @@ export default {
                 meta_desc: meta_desc,
             })
                 .then((response) => {
-                    // if (response.data.error) {
-                    //     toast.error(response.data.error, {
-                    //         autoClose: 3000,
-                    //     });
-                    //     // this.scrollToElement(response.data.column);
-                    //     this.error[response.data.column] = response.data.error;
+                    if (response.data.error) {
+                        toast.error(response.data.error, {
+                            autoClose: 3000,
+                        });
+                        // this.scrollToElement(response.data.column);
+                        this.error[response.data.column] = response.data.error;
 
-                    // } else {
-                    //     toast.success("Uploads dữ liệu thành công", {
-                    //         autoClose: 1000,
-                    //     });
-                    // }
+                    } else {
+                        toast.success("Uploads dữ liệu thành công", {
+                            autoClose: 1000,
+                        });
+                        this.$inertia.visit(route('CategoryProject'));
+                    }
                 })
                 .catch((error) => {
                     console.log(error);
@@ -270,10 +271,7 @@ export default {
         const data_meta_image = ref('');
         const meta_desc = ref('');
         const list_image = [];
-
-
         const data = usePage();
-
         data.props.data.list_images.forEach(element => {
             list_image.push(element.url_image)
 

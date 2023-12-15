@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\CategoryProject;
 use App\Models\ListSlug;
 use App\Models\ListImage;
@@ -26,19 +27,37 @@ class CategoryProjectController extends Controller
     }
     function showIndex()
     {
-        $data = CategoryProject::all();
+        $data = CategoryProject::with('listImages')->get();
         foreach ($data as $key => $value) {
             $value->create_time = Carbon::parse($value->created_at)->format('H:i , d/m/Y ');
             $value->update_time = Carbon::parse($value->updated_at)->format('H:i , d/m/Y ');
-            $value->list_image = ListView::where('tb', 'category_projects')
-                ->where('id_tb', $value->id)
-                ->get();
-
             $value->view = ListView::where('tb', 'category_projects')
                 ->where('id_tb', $value->id)
                 ->count();
         }
-        return Inertia::render('CategoryProject/Show', ['data' => $data]);
+        $trashCount = CategoryProject::onlyTrashed()->count();
+
+        return Inertia::render('CategoryProject/Show', ['data' => $data, 'trashCount' => $trashCount]);
+    }
+    function showTrash()
+    {
+        $data = CategoryProject::with('listImages')
+            ->onlyTrashed()
+            ->get();
+        foreach ($data as $key => $value) {
+            $value->create_time = Carbon::parse($value->created_at)->format('H:i , d/m/Y ');
+            $value->update_time = Carbon::parse($value->updated_at)->format('H:i , d/m/Y ');
+            $value->delete_at = Carbon::parse($value->deleted_at)->format('H:i , d/m/Y ');
+            $value->delete_time = Carbon::parse($value->deleted_at)
+                ->subDays(30)
+                ->format('H:i , d/m/Y ');
+            $value->view = ListView::where('tb', 'category_projects')
+                ->where('id_tb', $value->id)
+                ->count();
+        }
+        $trashCount = CategoryProject::onlyTrashed()->count();
+
+        return Inertia::render('CategoryProject/Trash', ['data' => $data, 'trashCount' => $trashCount]);
     }
 
     function create(Request $rq)
@@ -115,6 +134,7 @@ class CategoryProjectController extends Controller
     function showEdit($id)
     {
         $data = CategoryProject::with('listImages')->find($id);
+
         return Inertia::render('CategoryProject/Edit', ['data' => $data]);
     }
     function updateCategoryProject(Request $rq, $id)

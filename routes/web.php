@@ -34,9 +34,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     Route::post('/ckediter-uploads-file', [FileController::class, 'ckediterUploadsImage']);
     Route::post('/change-status', [VinawebappController::class, 'changeStatus']);
+    Route::post('/change-highlight', [VinawebappController::class, 'changeHighlight']);
+    Route::post('/delete-items', [VinawebappController::class, 'deleteItems']);
+    Route::post('/restore-items', [VinawebappController::class, 'restoreItems']);
+    Route::post('/change-ord', [VinawebappController::class, 'changeORD']);
     // start Category Project
     Route::prefix('category-project')->group(function () {
         Route::get('', [CategoryProjectController::class, 'showIndex'])->name('CategoryProject');
+        Route::get('/trash', [CategoryProjectController::class, 'showTrash'])->name('CategoryProjectTrash');
         Route::get('/create', function () {
             return Inertia::render('CategoryProject/Create');
         })->name('CategoryProjectCreate');

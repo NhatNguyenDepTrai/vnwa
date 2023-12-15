@@ -6,6 +6,17 @@
 
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
 #sidebar.active {
     width: 70px;
     animation: hideSideBar 0.4s ease 0s 1 normal forwards;
