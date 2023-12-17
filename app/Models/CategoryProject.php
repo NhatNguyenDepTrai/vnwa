@@ -12,6 +12,6 @@ class CategoryProject extends Model
     protected $fillable = ['url_bg', 'url_avatar', 'url_avatar_mobile', 'name', 'slug', 'desc', 'meta_title', 'content', 'meta_image', 'meta_desc'];
     public function listImages()
     {
-        return $this->hasMany(ListImage::class, 'id_tb');
+        return $this->hasMany(ListImage::class, 'id_tb')->where('tb', 'category_projects');
     }
 }

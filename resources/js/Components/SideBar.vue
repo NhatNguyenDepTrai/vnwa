@@ -41,7 +41,7 @@
                                     </SideBarMenuItemLink>
                                 </li>
                                 <li class="mb-1">
-                                    <SideBarMenuItemLink :href="route('dashboard')" :active="check('/project')">
+                                    <SideBarMenuItemLink :href="route('Project')" :active="check('/project')">
                                         Dự án
                                     </SideBarMenuItemLink>
 

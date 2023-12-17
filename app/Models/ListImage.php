@@ -10,8 +10,12 @@ class ListImage extends Model
     use HasFactory;
     protected $fillable = ['tb', 'id_tb', 'url_image'];
 
-    public function categoryProject()
+    // public function categoryProject()
+    // {
+    //     return $this->belongsTo(CategoryProject::class, 'id_tb');
+    // }
+    public function relatedTable()
     {
-        return $this->belongsTo(CategoryProject::class, 'id_tb');
+        return $this->morphTo('tb', 'id_tb');
     }
 }

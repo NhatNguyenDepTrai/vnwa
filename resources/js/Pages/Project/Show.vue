@@ -1,48 +1,111 @@
 <template>
-    <AppLayout title="Thùng Rác - Danh Mục Dự Án - VNWA ADMIN">
+    <AppLayout title="Dự Án">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Thùng rác danh mục dự án
+                Dự Án
             </h2>
-            <span class="text-gray-500 italic">Các dữ liệu trong thùng rác sẽ tự động xóa sau 30 ngày</span>
         </template>
 
         <div class="py-2">
             <div class="max-w-12xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg pt-8 pb-12 px-2">
                     <div class="float-left">
-
-                        <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="showModalRestoreMutipleItem">
-                            <icon :icon="['fas', 'rotate-left']" class="mr-1" /> Khôi phục dữ liệu chọn
-                        </button>
                         <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="showModalDeleteMutipleItem">
                             <icon :icon="['fas', 'x']" class="mr-1" /> Xóa dữ liệu chọn
                         </button>
                     </div>
                     <div class="float-right text-xs uppercase">
-                        <Link :href="route('CategoryProject')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4">
-                        <icon :icon="['fas', 'arrow-left']" class="mr-1" /> Trở về
+                        <Link :href="route('Project.trash')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4">
+                        <icon :icon="['fas', 'trash']" class="mr-3" />Thùng rác ({{ trashCount }})
+                        </Link>
+                        <Link :href="route('Project.create')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded ">
+                        <icon :icon="['fas', 'plus']" /> Thêm dữ liệu
                         </Link>
                     </div>
 
                     <div class="my-2 py-10">
                         <DataTable :headers="headers" :items="dataPage" buttons-pagination show-index v-model:items-selected="itemsSelected">
+                            <template #header-name="header">
+                                <div class="filter-column  flex items-center">
+                                    <div>
+                                        <button class="p-2 text-center  mr-2 border-none " :class="{ 'bg-purple-400 text-white': search.name.trim() }" @click="appear.name = !appear.name">
+                                            <icon :icon="['fas', 'filter']" />
+                                        </button>
+                                        <div class="filter-menu absolute z-30 top-9 w-52 flex items-center justify-center" v-if="appear.name">
+                                            <input style="height: 30px;" type="text" class="text-xs h-8 border-r-0" v-model="search.name" @input="searchDataTable('name', $event)" placeholder="Tìm kiếm" />
+
+                                            <button style="height: 30px; width: 30px;" class="bg-black text-white hover:text-red-400" @click="appear.name = false">
+                                                <icon :icon="['fas', 'x']" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {{ header.text }}
+
+                                </div>
+                            </template>
+                            <template #header-nameCategoryProject="header">
+                                <div class="filter-column  flex items-center">
+                                    <div>
+                                        <button class="p-2 text-center  mr-2 border-none " :class="{ 'bg-purple-400 text-white': search.category_project.trim() }" @click="appear.category_project = !appear.category_project">
+                                            <icon :icon="['fas', 'filter']" />
+                                        </button>
+                                        <div class="filter-menu absolute z-30 top-9 w-52 flex items-center justify-center" v-if="appear.category_project">
+                                            <input style="height: 30px;" type="text" class="text-xs h-8 border-r-0" v-model="search.category_project" @input="searchDataTable('category_project', $event)" placeholder="Tìm kiếm" />
+
+                                            <button style="height: 30px; width: 30px;" class="bg-black text-white hover:text-red-400" @click="appear.category_project = false">
+                                                <icon :icon="['fas', 'x']" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {{ header.text }}
+
+                                </div>
+                            </template>
+
                             <template #item-name="{ name, url_avatar }">
                                 <div class="py-3 flex items-center justify-start">
                                     <img :src="url_avatar" alt="vinawebapp.com" class="w-20 h-auto mr-3 block"> <span class=" block text-sm font-bold">{{ name }}</span>
                                 </div>
                             </template>
+                            <template #item-status="{ id, status }">
+                                <div class="flex items-center cursor-pointer">
+                                    <input type="checkbox" :id="'statusCheckbox-' + id" v-model="checkedStatusItems[id]" class="hidden" @change="handleStatusChange(id, status)" />
+                                    <label :for="'statusCheckbox-' + id" class="flex items-center cursor-pointer">
+                                        <div class="relative">
+                                            <div class="toggle-path bg-gray-300 w-9 h-5 rounded-full p-0">
+                                                <div class="toggle-circle  w-5 h-5 rounded-full shadow-md" :class="{ 'transform translate-x-full bg-purple-500': checkedStatusItems[id], 'bg-white': !checkedStatusItems[id] }"></div>
+                                            </div>
+                                        </div>
 
+                                    </label>
+                                </div>
+                            </template>
+                            <template #item-highlight="{ id, highlight }">
+                                <div class="flex items-center cursor-pointer justify-center">
+                                    <input type="checkbox" :id="'highlightCheckbox-' + id" v-model="checkedHighlightItems[id]" class="hidden" @change="handleHighlightChange(id, highlight)" />
+                                    <label :for="'highlightCheckbox-' + id" class="flex items-center cursor-pointer">
+                                        <div class="relative">
+                                            <div class="toggle-path bg-gray-300 w-9 h-5 rounded-full p-0">
+                                                <div class="toggle-circle  w-5 h-5 rounded-full shadow-md" :class="{ 'transform translate-x-full bg-purple-500': checkedHighlightItems[id], 'bg-white': !checkedHighlightItems[id] }"></div>
+                                            </div>
+                                        </div>
 
-
+                                    </label>
+                                </div>
+                            </template>
+                            <template #item-ord="{ id, name, ord }">
+                                <div class="py-3 flex items-center justify-center">
+                                    <input type="number" class=" text-black rounded  text-center px-1" :value="ord" style="max-width: 50px;" @input="changeORD(id, name, $event)">
+                                </div>
+                            </template>
                             <template #item-operation="{ id, name }">
                                 <div class="py-3 flex items-center justify-center">
-                                    <button class="bg-green-600 text-white px-2 py-1 rounded-md mr-5" @click="showModalRestoreItem(id, name)">
-                                        <icon :icon="['fas', 'rotate-left']" />
-                                    </button>
                                     <button class="bg-red-600 text-white px-2 py-1 rounded-md mr-5" @click="showModalDeleteItem(id, name)">
                                         <icon :icon="['fas', 'x']" />
                                     </button>
+                                    <Link :href="route('Project.edit', id)" class="bg-yellow-600 text-white px-2 py-1 rounded-md mr-5">
+                                    <icon :icon="['fas', 'pen-to-square']" />
+                                    </Link>
                                 </div>
                             </template>
                             <template #expand="item">
@@ -162,23 +225,29 @@
                         <icon :icon="['fas', 'x']" class="text-red-600 mr-1" /> <span>{{ item.name }}</span>
                     </div>
                 </div>
-                <div v-else>
-                    <span class="text-center text-red-800 font-bold">Vui lòng chọn một dữ liệu</span>
-                </div>
+
                 <div class="mt-3 mb-1">
                     <div class="text-xs text-gray-600">Lưu ý :
                         <ul class="pl-4">
-                            <li class=" font-bold list-disc" style="font-family: Arial, Helvetica, sans-serif;">Các dữ liệu được xóa vĩnh viễn không thể khôi phục </li>
+                            <li class=" font-bold list-disc" style="font-family: Arial, Helvetica, sans-serif;">Các dữ liệu được xóa sẽ tự động đưa vào thùng rác </li>
+                            <li class=" font-bold list-disc" style="font-family: Arial, Helvetica, sans-serif;">Các dữ liệu trong thùng rác được tự động xóa sau 30 </li>
+                            <li class=" font-bold list-disc" style="font-family: Arial, Helvetica, sans-serif;">Muốn xóa trực tiếp hãy bỏ chọn checkbox bên dưới</li>
                         </ul>
                     </div>
+                    <div class="max-w-xs">
+                        <div class="flex items-center h-6 mt-3 cursor-pointer  ">
+                            <input id="bordered-checkbox-1" :checked="checkboxDeleteToTrash" @click="checkboxDeleteToTrash = !checkboxDeleteToTrash" type="checkbox" value="" name="bordered-checkbox" class="  cursor-pointer w-4 h-4 text-blue-600 bg-gray-100  focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700">
+                            <label for="bordered-checkbox-1" class=" cursor-pointer w-full py-4 ms-2 text-sm font-medium text-black ">Đưa vào thùng rác</label>
+                        </div>
 
+                    </div>
                 </div>
             </template>
 
             <template #footer>
 
 
-                <button v-if="itemsDelete.length > 0" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="deleteItems">
+                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="deleteItems">
                     Xóa dữ liệu
                 </button>
                 <button class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="closeModal">
@@ -187,37 +256,6 @@
             </template>
         </DialogModal>
 
-        <DialogModal :show="modalRestore" @close="closeModal">
-            <template #title>
-                Khôi phục dữ liệu
-            </template>
-
-            <template #content>
-                Bạn muốn khôi phục các dữ liệu này?
-                <div class="mt-4">
-                </div>
-                <div v-if="itemsRestore.length > 0">
-                    <div class="flex items-center" v-for="item in itemsRestore">
-                        <icon :icon="['fas', 'x']" class="text-red-600 mr-1" /> <span>{{ item.name }}</span>
-                    </div>
-                </div>
-                <div v-else>
-                    <span class="text-center text-red-800 font-bold">Vui lòng chọn một dữ liệu</span>
-                </div>
-
-            </template>
-
-            <template #footer>
-
-
-                <button v-if="itemsRestore.length > 0" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="restoreItems">
-                    Khôi phục dữ liệu
-                </button>
-                <button class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4 text-xs" @click="closeModal">
-                    Hủy lệnh
-                </button>
-            </template>
-        </DialogModal>
     </AppLayout>
 </template>
 
@@ -227,7 +265,9 @@ import Welcome from '@/Components/Welcome.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import DialogModal from '@/Components/DialogModal.vue';
-
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import axios from 'axios';
 
 export default {
     props: {
@@ -239,27 +279,57 @@ export default {
     },
     data() {
         return {
-            checkboxDeleteToTrash: false,
-            itemsRestore: [],
+            checkboxDeleteToTrash: true,
             itemsDelete: [],
             modalDelete: false,
-            modalRestore: false,
             itemsSelected: [],
             headers: [
+                { text: "Danh mục", value: "nameCategoryProject" },
                 { text: "Tên dữ liệu", value: "name" },
-
-                { text: " Đưa Vào Thùng Rác", value: "delete_at" },
-                // { text: "Xóa Hoàn Toàn", value: "delete_time" },
-                { text: "Khôi phục", value: "operation" },
+                { text: "Thứ tự xuất hiện", value: "ord", sortable: true },
+                { text: "View", value: "view", sortable: true },
+                { text: "Ngày tạo", value: "create_time" },
+                { text: "Nổi bật", value: "highlight" },
+                { text: "Trạng thái", value: "status" },
+                { text: "Hành động", value: "operation" },
             ],
+
         };
     },
     methods: {
+
         closeModal() {
             this.modalDelete = false;
-            this.modalRestore = false;
         },
+        changeORD(id, name, event) {
+            if (event.target.value) {
+
+
+                axios.post('/change-ord', {
+                    tb: 'projects',
+                    id: id,
+                    value: event.target.value,
+                })
+                    .then((response) => {
+                        var toastMess = "Cập nhập ORD cho " + name + " thành " + event.target.value + " thành công !";
+                        toast.success(toastMess, {
+                            autoClose: 1000,
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            }
+            else {
+                toast.error("ORD không được bỏ trống", {
+                    autoClose: 1000,
+                });
+            }
+        },
+
         async deleteItems() {
+
+
             try {
                 const dataDelete = [];
                 this.itemsDelete.forEach(element => {
@@ -269,20 +339,23 @@ export default {
                 const checkboxDeleteToTrash = this.checkboxDeleteToTrash;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/delete-items', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     dataId: dataDelete,
-                    trash: checkboxDeleteToTrash, // Chuyển đổi giá trị status
+                    trash: checkboxDeleteToTrash,
                 });
 
-                location.reload();
-
+                this.loadData();
+                this.modalDelete = false;
+                toast.success("Xóa dữ liệu thành công", {
+                    autoClose: 1500,
+                });
 
             } catch (error) {
                 console.error('Error while changing status:', error);
             }
         },
-
         showModalDeleteMutipleItem() {
+
             this.itemsDelete = [];
             this.itemsSelected.forEach(element => {
                 // this.itemsDelete['id'] = element.id;
@@ -300,52 +373,24 @@ export default {
             this.modalDelete = true;
 
         },
-        showModalRestoreMutipleItem() {
-            this.itemsRestore = [];
-            this.itemsSelected.forEach(element => {
-                this.itemsRestore.push({ id: element.id, name: element.name })
-
-            });
-            console.log(this.itemsDelete)
-            this.modalRestore = true;
-
-        },
-        showModalRestoreItem(dataId, dataName) {
-            this.itemsRestore = [];
-            this.itemsRestore.push({ id: dataId, name: dataName })
-            this.modalRestore = true;
-        },
-        async restoreItems() {
-            try {
-                const dataRestore = [];
-                this.itemsRestore.forEach(element => {
-                    dataRestore.push(element.id)
-
-                });
-
-                const response = await axios.post('/restore-items', {
-                    tb: 'category_projects',
-                    dataId: dataRestore,
-
-                });
-                location.reload();
-            } catch (error) {
-                console.error('Error while changing status:', error);
-            }
-        },
         async handleStatusChange(id, currentStatus) {
             try {
                 const newStatus = !currentStatus ? 1 : 0;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/change-status', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     id: id,
                     status: newStatus, // Chuyển đổi giá trị status
                 });
-
-
-
-
+                if (newStatus == 1) {
+                    toast.success("Hiện dữ liệu thành công", {
+                        autoClose: 1000,
+                    });
+                } else {
+                    toast.success("Ẩn dữ liệu thành công", {
+                        autoClose: 1000,
+                    });
+                }
             } catch (error) {
                 console.error('Error while changing status:', error);
             }
@@ -356,33 +401,95 @@ export default {
                 const newHighlight = !highlight ? 1 : 0;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/change-highlight', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     id: id,
                     highlight: newHighlight, // Chuyển đổi giá trị status
+                });
+                toast.success("Chỉnh sửa hightlight thành công!", {
+                    autoClose: 1000,
                 });
             } catch (error) {
                 console.error('Error while changing status:', error);
             }
         },
     },
+
     setup() {
+        const dataAll = ref([]);
         const dataPage = ref([]);
         const data = usePage();
-        const trashCount = data.props.trashCount;
-        dataPage.value = data.props.data;
-        dataPage.value = data.props.data.map(item => {
+
+        const trashCount = ref();
+
+
+        trashCount.value = data.props.trashCountNumber;
+
+        dataAll.value = data.props.data;
+        dataAll.value = data.props.data.map(item => {
             return { ...item, status: item.status === 1 ? true : false };
         });
+
+        const loadData = () => {
+            axios.post('project/load-data-table')
+                .then((response) => {
+                    let returnData = response.data;
+                    dataPage.value = returnData.data;
+                    dataPage.value = returnData.data.map(item => {
+                        return { ...item, status: item.status === 1 ? true : false };
+                    });
+
+                    trashCount.value = returnData.trashCount;
+                    console.log(trashCount.value)
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+
         const checkedStatusItems = ref([]);
-        dataPage.value.forEach(element => {
+        dataAll.value.forEach(element => {
             checkedStatusItems.value[element.id] = element.status;
         });
         const checkedHighlightItems = ref([]);
-        dataPage.value.forEach(element => {
+        dataAll.value.forEach(element => {
             checkedHighlightItems.value[element.id] = element.highlight;
         });
+
+        dataPage.value = dataAll.value;
+
+
+
+
+        const appear = ref({ name: false, category_project: false });
+        const search = ref({ name: '', category_project: '' });
+
+
+        const searchDataTable = (column, event) => {
+
+            for (const key in search.value) {
+                if (key !== column) {
+                    search.value[key] = '';
+                    appear.value[key] = false
+                }
+            }
+
+            const input = ref('');
+            input.value = event.target.value;
+
+            if (input.value) {
+                const searchResults = dataAll.value.filter(item => item[column].trim().toLowerCase().includes(input.value.trim().toLowerCase()));
+                dataPage.value = searchResults;
+            } else {
+                dataPage.value = dataAll.value;
+
+            }
+
+        }
+
+
         return {
-            dataPage, checkedStatusItems, checkedHighlightItems, trashCount
+            dataPage, checkedStatusItems, checkedHighlightItems, trashCount, loadData, searchDataTable, appear,
+            search
         }
     },
     // Các phương thức khác của component

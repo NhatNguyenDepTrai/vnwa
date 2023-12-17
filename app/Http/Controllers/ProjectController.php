@@ -5,12 +5,13 @@ use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Project;
 use App\Models\CategoryProject;
 use App\Models\ListSlug;
 use App\Models\ListImage;
 use App\Models\ListView;
 
-class CategoryProjectController extends Controller
+class ProjectController extends Controller
 {
     function createSlug($slug)
     {
@@ -25,17 +26,30 @@ class CategoryProjectController extends Controller
             ->first();
         return $check ? true : false;
     }
+    public function loadAllDataCategoryProject()
+    {
+        $data = CategoryProject::select('id', 'name')->get();
+        return response()->json(['data', $data]);
+    }
     public function loadDataTable()
     {
-        $data = CategoryProject::with('listImages')->get();
+        $data = Project::with('listImages')
+            ->with('categoryProject')
+            ->get();
+
         foreach ($data as $key => $value) {
             $value->create_time = Carbon::parse($value->created_at)->format('H:i , d/m/Y ');
             $value->update_time = Carbon::parse($value->updated_at)->format('H:i , d/m/Y ');
-            $value->view = ListView::where('tb', 'category_projects')
+            $value->view = ListView::where('tb', 'projects')
                 ->where('id_tb', $value->id)
                 ->count();
+            $value->view = ListView::where('tb', 'projects')
+                ->where('id_tb', $value->id)
+                ->count();
+
+            $value->nameCategoryProject = CategoryProject::find($value->id_category_project)->name;
         }
-        $trashCount = CategoryProject::onlyTrashed()->count();
+        $trashCount = Project::onlyTrashed()->count();
 
         return response()->json(['data' => $data, 'trashCount' => $trashCount]);
     }
@@ -45,14 +59,19 @@ class CategoryProjectController extends Controller
         $data = json_decode($jsonData, true)['data']; // Giải mã JSON và lấy giá trị của 'data'
         $trashCount = json_decode($jsonData, true)['trashCount'];
 
-        return Inertia::render('CategoryProject/Show', ['data' => $data, 'trashCountNumber' => $trashCount]);
+        return Inertia::render('Project/Show', ['data' => $data, 'trashCountNumber' => $trashCount]);
     }
-
+    function showCreate()
+    {
+        $data = CategoryProject::select('id', 'name')->get();
+        return Inertia::render('Project/Create', ['dataCategoryProject' => $data]);
+    }
     function showTrash()
     {
-        $data = CategoryProject::with('listImages')
+        $data = Project::with('listImages')
             ->onlyTrashed()
             ->get();
+
         foreach ($data as $key => $value) {
             $value->create_time = Carbon::parse($value->created_at)->format('H:i , d/m/Y ');
             $value->update_time = Carbon::parse($value->updated_at)->format('H:i , d/m/Y ');
@@ -60,24 +79,28 @@ class CategoryProjectController extends Controller
             $value->delete_time = Carbon::parse($value->deleted_at)
                 ->subDays(30)
                 ->format('H:i , d/m/Y ');
-            $value->view = ListView::where('tb', 'category_projects')
+            $value->view = ListView::where('tb', 'projects')
                 ->where('id_tb', $value->id)
                 ->count();
         }
-        $trashCount = CategoryProject::onlyTrashed()->count();
+        $trashCount = Project::onlyTrashed()->count();
 
-        return Inertia::render('CategoryProject/Trash', ['data' => $data, 'trashCount' => $trashCount]);
+        return Inertia::render('Project/Trash', ['data' => $data, 'trashCount' => $trashCount]);
     }
 
     function create(Request $rq)
     {
-        $tb = 'category_projects';
+        $tb = 'projects';
         $listSubImage = $rq->listSubImage;
         $data = [];
         $data['url_bg'] = $rq->url_bg;
         $data['desc'] = $rq->desc;
         $data['content'] = $rq->content;
-
+        if (!$rq->id_category_project) {
+            return response()->json(['error' => 'Vui lòng chọn danh mục dự án', 'column' => 'id_category_project']);
+        } else {
+            $data['id_category_project'] = $rq->id_category_project;
+        }
         if (!$rq->url_avatar) {
             return response()->json(['error' => 'Vui lòng chọn ảnh đại diện', 'column' => 'url_avatar']);
         } else {
@@ -123,7 +146,7 @@ class CategoryProjectController extends Controller
             $data['meta_desc'] = $rq->meta_desc;
         }
 
-        $id_tb = CategoryProject::create($data)->id;
+        $id_tb = Project::create($data)->id;
         ListSlug::create([
             'tb' => $tb,
             'id_tb' => $id_tb,
@@ -142,13 +165,14 @@ class CategoryProjectController extends Controller
     }
     function showEdit($id)
     {
-        $data = CategoryProject::with('listImages')->find($id);
+        $data = Project::with('listImages')->find($id);
+        $dataCategoryProject = CategoryProject::get(['name', 'id']);
 
-        return Inertia::render('CategoryProject/Edit', ['data' => $data]);
+        return Inertia::render('Project/Edit', ['data' => $data, 'dataCategoryProject' => $dataCategoryProject]);
     }
-    function updateCategoryProject(Request $rq, $id)
+    function updateProject(Request $rq, $id)
     {
-        $tb = 'category_projects';
+        $tb = 'projects';
         $listSubImage = $rq->listSubImage;
         $data = [];
         $data['url_bg'] = $rq->url_bg;
@@ -156,6 +180,11 @@ class CategoryProjectController extends Controller
         $data['content'] = $rq->content;
         if (!$id) {
             return response()->json(['error' => 'Có lỗi xảy ra, không cập nhập được slug, hãy load lại trang', 'column' => 'slug']);
+        }
+        if (!$rq->id_category_project) {
+            return response()->json(['error' => 'Vui lòng chọn danh mục dự án', 'column' => 'id_category_project']);
+        } else {
+            $data['id_category_project'] = $rq->id_category_project;
         }
         if (!$rq->url_avatar) {
             return response()->json(['error' => 'Vui lòng chọn ảnh đại diện', 'column' => 'url_avatar']);
@@ -202,7 +231,7 @@ class CategoryProjectController extends Controller
             $data['meta_desc'] = $rq->meta_desc;
         }
 
-        CategoryProject::where('id', $id)->update($data);
+        Project::where('id', $id)->update($data);
         ListSlug::where('tb', $tb)
             ->where('id_tb', $id)
             ->update(['name' => $rq->name, 'slug' => $rq->slug]);

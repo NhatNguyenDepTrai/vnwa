@@ -25,6 +25,24 @@
 
                     <div class="my-2 py-10">
                         <DataTable :headers="headers" :items="dataPage" buttons-pagination show-index v-model:items-selected="itemsSelected">
+                            <template #header-name="header">
+                                <div class="filter-column  flex items-center">
+                                    <div>
+                                        <button class="p-2 text-center  mr-2 border-none " :class="{ 'bg-purple-400 text-white': searchName.trim() }" @click="inputSearchName = !inputSearchName">
+                                            <icon :icon="['fas', 'filter']" />
+                                        </button>
+                                        <div class="filter-menu absolute z-30 top-9 w-52 flex items-center justify-center" v-if="inputSearchName">
+                                            <input style="height: 30px;" type="text" class="text-xs h-8 border-r-0" v-model="searchName" @input="searchDataTable()" placeholder="Tìm kiếm" />
+
+                                            <button style="height: 30px; width: 30px;" class="bg-black text-white hover:text-red-400" @click="inputSearchName = false">
+                                                <icon :icon="['fas', 'x']" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {{ header.text }}
+
+                                </div>
+                            </template>
                             <template #item-name="{ name, url_avatar }">
                                 <div class="py-3 flex items-center justify-start">
                                     <img :src="url_avatar" alt="vinawebapp.com" class="w-20 h-auto mr-3 block"> <span class=" block text-sm font-bold">{{ name }}</span>
@@ -218,6 +236,7 @@
                 </button>
             </template>
         </DialogModal>
+
     </AppLayout>
 </template>
 
@@ -229,7 +248,7 @@ import { ref } from 'vue';
 import DialogModal from '@/Components/DialogModal.vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-
+import axios from 'axios';
 
 export default {
     props: {
@@ -241,22 +260,25 @@ export default {
     },
     data() {
         return {
+            inputSearchName: false,
             checkboxDeleteToTrash: true,
             itemsDelete: [],
             modalDelete: false,
             itemsSelected: [],
             headers: [
                 { text: "Tên dữ liệu", value: "name" },
-                { text: "Thứ tự xuất hiện", value: "ord" },
-                { text: "View", value: "view" },
+                { text: "Thứ tự xuất hiện", value: "ord", sortable: true },
+                { text: "View", value: "view", sortable: true },
                 { text: "Ngày tạo", value: "create_time" },
                 { text: "Nổi bật", value: "highlight" },
                 { text: "Trạng thái", value: "status" },
                 { text: "Hành động", value: "operation" },
             ],
+
         };
     },
     methods: {
+
         closeModal() {
             this.modalDelete = false;
         },
@@ -300,11 +322,14 @@ export default {
                 const response = await axios.post('/delete-items', {
                     tb: 'category_projects',
                     dataId: dataDelete,
-                    trash: checkboxDeleteToTrash, // Chuyển đổi giá trị status
+                    trash: checkboxDeleteToTrash,
                 });
 
-                location.reload();
-
+                this.loadData();
+                this.modalDelete = false;
+                toast.success("Xóa dữ liệu thành công", {
+                    autoClose: 1500,
+                });
 
             } catch (error) {
                 console.error('Error while changing status:', error);
@@ -369,24 +394,64 @@ export default {
             }
         },
     },
+
     setup() {
+        const dataAll = ref([]);
         const dataPage = ref([]);
         const data = usePage();
-        const trashCount = data.props.trashCount;
-        dataPage.value = data.props.data;
-        dataPage.value = data.props.data.map(item => {
+
+        const trashCount = ref();
+
+
+        trashCount.value = data.props.trashCountNumber;
+
+        dataAll.value = data.props.data;
+        dataAll.value = data.props.data.map(item => {
             return { ...item, status: item.status === 1 ? true : false };
         });
+
+        const loadData = () => {
+            axios.post('category-project/load-data-table')
+                .then((response) => {
+                    let returnData = response.data;
+                    dataPage.value = returnData.data;
+                    dataPage.value = returnData.data.map(item => {
+                        return { ...item, status: item.status === 1 ? true : false };
+                    });
+
+                    trashCount.value = returnData.trashCount;
+                    console.log(trashCount.value)
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+
         const checkedStatusItems = ref([]);
-        dataPage.value.forEach(element => {
+        dataAll.value.forEach(element => {
             checkedStatusItems.value[element.id] = element.status;
         });
         const checkedHighlightItems = ref([]);
-        dataPage.value.forEach(element => {
+        dataAll.value.forEach(element => {
             checkedHighlightItems.value[element.id] = element.highlight;
         });
+
+        dataPage.value = dataAll.value;
+        const searchName = ref('');
+        const searchDataTable = () => {
+            if (searchName.value) {
+                const searchResults = dataAll.value.filter(item => item.name.trim().toLowerCase().includes(searchName.value.trim().toLowerCase()));
+                dataPage.value = searchResults;
+            } else {
+                dataPage.value = dataAll.value;
+
+            }
+
+        }
+
+
         return {
-            dataPage, checkedStatusItems, checkedHighlightItems, trashCount
+            dataPage, checkedStatusItems, checkedHighlightItems, trashCount, loadData, searchDataTable, searchName
         }
     },
     // Các phương thức khác của component

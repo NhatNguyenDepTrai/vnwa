@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\CategoryProjectController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\VinawebappController;
 
 /*
@@ -41,6 +42,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // start Category Project
     Route::prefix('category-project')->group(function () {
         Route::get('', [CategoryProjectController::class, 'showIndex'])->name('CategoryProject');
+        Route::post('load-data-table', [CategoryProjectController::class, 'loadDataTable']);
+
         Route::get('/trash', [CategoryProjectController::class, 'showTrash'])->name('CategoryProjectTrash');
         Route::get('/create', function () {
             return Inertia::render('CategoryProject/Create');
@@ -51,4 +54,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/edit/{id}', [CategoryProjectController::class, 'updateCategoryProject']);
     });
     // end Category Project
+    // start  Project
+    Route::prefix('project')->group(function () {
+        Route::get('', [ProjectController::class, 'showIndex'])->name('Project');
+        Route::post('load-all-data-category-project', [ProjectController::class, 'loadAllDataCategoryProject']);
+        Route::post('load-data-table', [ProjectController::class, 'loadDataTable']);
+        Route::get('/trash', [ProjectController::class, 'showTrash'])->name('Project.trash');
+        Route::get('create', [ProjectController::class, 'showCreate'])->name('Project.create');
+
+        Route::post('/create', [ProjectController::class, 'create']);
+
+        Route::get('/edit/{id}', [ProjectController::class, 'showEdit'])->name('Project.edit');
+        Route::post('/edit/{id}', [ProjectController::class, 'UpdateProject']);
+    });
+    // end  Project
 });

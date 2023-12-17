@@ -2,7 +2,7 @@
     <AppLayout title="Thùng Rác - Danh Mục Dự Án - VNWA ADMIN">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Thùng rác danh mục dự án
+                Thùng rác dự án
             </h2>
             <span class="text-gray-500 italic">Các dữ liệu trong thùng rác sẽ tự động xóa sau 30 ngày</span>
         </template>
@@ -20,7 +20,7 @@
                         </button>
                     </div>
                     <div class="float-right text-xs uppercase">
-                        <Link :href="route('CategoryProject')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4">
+                        <Link :href="route('Project')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-2 rounded mr-4">
                         <icon :icon="['fas', 'arrow-left']" class="mr-1" /> Trở về
                         </Link>
                     </div>
@@ -269,7 +269,7 @@ export default {
                 const checkboxDeleteToTrash = this.checkboxDeleteToTrash;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/delete-items', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     dataId: dataDelete,
                     trash: checkboxDeleteToTrash, // Chuyển đổi giá trị status
                 });
@@ -324,7 +324,7 @@ export default {
                 });
 
                 const response = await axios.post('/restore-items', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     dataId: dataRestore,
 
                 });
@@ -338,7 +338,7 @@ export default {
                 const newStatus = !currentStatus ? 1 : 0;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/change-status', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     id: id,
                     status: newStatus, // Chuyển đổi giá trị status
                 });
@@ -356,7 +356,7 @@ export default {
                 const newHighlight = !highlight ? 1 : 0;
                 // Gửi POST request tới server để thay đổi giá trị status
                 const response = await axios.post('/change-highlight', {
-                    tb: 'category_projects',
+                    tb: 'projects',
                     id: id,
                     highlight: newHighlight, // Chuyển đổi giá trị status
                 });

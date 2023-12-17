@@ -34,7 +34,7 @@ class SoftDeleteExpiredRecords implements ShouldQueue
                 $now = Carbon::now();
                 $delete_at = Carbon::parse($value->deleted_at);
 
-                if ($delete_at->diffInDays($now) > 1) {
+                if ($delete_at->diffInDays($now) > 30) {
                     CategoryProject::where('id', $value->id)->forceDelete();
                 }
             }
