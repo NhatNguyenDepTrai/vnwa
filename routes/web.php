@@ -7,6 +7,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\CategoryProjectController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\VinawebappController;
+use App\Http\Controllers\CompanyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,16 +30,24 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
-
     Route::post('/ckediter-uploads-file', [FileController::class, 'ckediterUploadsImage']);
     Route::post('/change-status', [VinawebappController::class, 'changeStatus']);
     Route::post('/change-highlight', [VinawebappController::class, 'changeHighlight']);
     Route::post('/delete-items', [VinawebappController::class, 'deleteItems']);
     Route::post('/restore-items', [VinawebappController::class, 'restoreItems']);
     Route::post('/change-ord', [VinawebappController::class, 'changeORD']);
+    Route::post('/get-data-district/{id}', [VinawebappController::class, 'getDataDistrict']);
+    Route::post('/get-data-ward/{id}', [VinawebappController::class, 'getDataWard']);
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+    // start Company
+    Route::prefix('company')->group(function () {
+        Route::get('', [CompanyController::class, 'showCompany'])->name('Company');
+        Route::post('', [CompanyController::class, 'UpdateCompany']);
+    });
+    // end Company
+
     // start Category Project
     Route::prefix('category-project')->group(function () {
         Route::get('', [CategoryProjectController::class, 'showIndex'])->name('CategoryProject');

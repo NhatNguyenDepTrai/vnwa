@@ -17,6 +17,17 @@ import axios from 'axios';
 window.axios = axios;
 library.add(fas)
 library.add(fab)
+import { LoadingPlugin } from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/css/index.css';
+
+
+
+
+
+
+
+
+
 const appName = import.meta.env.VITE_APP_NAME || 'VNWA ADMIN';
 
 createInertiaApp({
@@ -28,6 +39,9 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(store)
             .use(CKEditor)
+            .use(LoadingPlugin, {
+                color: 'purple'
+            })
             .component('icon', FontAwesomeIcon)
             .component('DataTable', Vue3EasyDataTable)
             .mount(el);

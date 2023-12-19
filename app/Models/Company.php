@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     use HasFactory;
+    protected $fillable = ['url_avatar_full', 'url_avatar_icon', 'url_favicon', 'name', 'short_name', 'slogan', 'sub_slogan', 'website', 'phone', 'hotline', 'mail', 'support_mail', 'zalo', 'facebook', 'youtube', 'intagrams', 'province', 'district', 'ward', 'address', 'about', 'meta_title', 'meta_image', 'meta_desc'];
 }

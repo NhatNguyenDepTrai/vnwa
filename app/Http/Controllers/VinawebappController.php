@@ -11,7 +11,9 @@ use App\Models\CategoryProject;
 use App\Models\ListSlug;
 use App\Models\ListImage;
 use App\Models\ListView;
-
+use App\Models\Province;
+use App\Models\District;
+use App\Models\Ward;
 class VinawebappController extends Controller
 {
     function changeStatus(Request $request)
@@ -55,5 +57,16 @@ class VinawebappController extends Controller
             ->where('id', $request->id)
             ->update(['ord' => $request->value]);
         return response()->json('Update ORD Success');
+    }
+
+    function getDataDistrict($id)
+    {
+        $data = District::where('id_province', $id)->get();
+        return response()->json(['data' => $data]);
+    }
+    function getDataWard($id)
+    {
+        $data = Ward::where('id_district', $id)->get();
+        return response()->json(['data' => $data]);
     }
 }
